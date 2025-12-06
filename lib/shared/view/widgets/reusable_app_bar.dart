@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import '../../../core/theme/app_styles.dart';
@@ -25,7 +24,7 @@ class ReusableAppBar extends HookWidget implements PreferredSizeWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context).colorScheme;
     final Color foregroundColor = Colors.white;
-    final bool canPop = Navigator.canPop(context);
+    // final bool canPop = Navigator.canPop(context);
     //    final bool canPop = Navigator.of(context).canPop();
     // final Color foregroundColor = theme.surface;
     return AppBar(
