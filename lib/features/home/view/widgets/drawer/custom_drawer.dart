@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:todolistapp/core/constants/app_constants.dart';
-import 'package:todolistapp/core/constants/static_assets/app_icons.dart';
 import '../../../../../core/theme/app_gradients.dart';
 import '../../../../../core/utils/util.dart';
 import '../../../../../shared/view/widgets/reusable_circular_image.dart';
