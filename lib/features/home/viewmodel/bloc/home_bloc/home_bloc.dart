@@ -1,6 +1,7 @@
 import 'package:android_alarm_manager_plus/android_alarm_manager_plus.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:logger/logger.dart';
 import 'package:todolistapp/core/services/alarm_callback.dart';
 import 'package:todolistapp/core/utils/date_time_utils.dart';
 import 'package:todolistapp/features/home/model/todo_list_model.dart';
@@ -13,6 +14,13 @@ part 'home_state.dart';
 
 class HomeBloc extends Bloc<HomeEvent, HomeState> {
   DBHelper _dbHelper = DBHelper();
+  final logger = Logger(
+    printer: PrettyPrinter(
+      methodCount: 0,       // removes stack frame logs
+      errorMethodCount: 0,  // removes error stack frames
+    ),
+  );
+
 
   HomeBloc() : super(const HomeState()) {
     on<AllFiltersEvent>(_allFiltersEvent);
@@ -138,7 +146,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
       );
       bool isValueAdded = await _dbHelper.addTodoListData(note);
       if (isValueAdded) {
-        print("is value Added $isValueAdded");
+        logger.i("is value Added $isValueAdded");
         add(FetchNotesEvent());
       }
     } catch (e) {
@@ -164,7 +172,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
       bool isValueUpdated = await _dbHelper.updateTodoListData(note);
 
       if (isValueUpdated) {
-        print("is value Added $isValueUpdated");
+        logger.i("is value Updated $isValueUpdated");
         add(FetchNotesEvent());
       }
     } catch (e) {
@@ -193,7 +201,10 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     Emitter<HomeState> emit,
   ) async
   {
+
+
     try {
+      logger.i("📥 Fetching notes from database...");
       List<TodoListModel> noteList = await _dbHelper.fetchTodoListData();
 
       ///Set All the reminders
@@ -203,6 +214,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
           final now = DateTime.now();
             // schedule alarm
             if (due.isAfter(now)) {
+              logger.i("⏳ Scheduling reminder → ID: ${note.id}, Time: $due");
               final scheduled = await AndroidAlarmManager.oneShotAt(
                 due,
                 note.id!,
@@ -217,13 +229,20 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
               );
 
               if (scheduled) {
-                print("⏰ Reminder SET SUCCESSFULLY → ID: ${note.id}, Time: $due");
+                logger.i("⏰ Reminder scheduled successfully → ID: ${note.id}, Time: $due");
               } else {
-                print("❌ Reminder FAILED to schedule → ID: ${note.id}");
+                logger.e("❌ Reminder failed to schedule → ID: ${note.id}");
               }
-          }
+
+          }else{
+              logger.w("⚠ Reminder skipped → Due date already passed for ID: ${note.id}");
+            }
         }
       }
+
+      // --------------------------------------------------------------------------
+      // 2. Title Search Filter
+      // --------------------------------------------------------------------------
 
       ///Top Level first check the title
       if(event.title!=null && event.title!.isNotEmpty)
@@ -234,24 +253,34 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
 
         }
 
-      ///Second Level then check the priority level
-      if (state.priorityLevel == PriorityLevel.all) {
-        // DO NOTHING → show all notes
-        print("Priority filter: ALL");
-      }
-      else if (state.priorityLevel == PriorityLevel.low) {
-        noteList = noteList.where((note) => note.priority == 0).toList();
-        print("Priority filter: LOW = ${noteList.length}");
-      }
-      else if (state.priorityLevel == PriorityLevel.medium) {
-        noteList = noteList.where((note) => note.priority == 1).toList();
-        print("Priority filter: MEDIUM = ${noteList.length}");
-      }
-      else if (state.priorityLevel == PriorityLevel.high) {
-        noteList = noteList.where((note) => note.priority == 2).toList();
-        print("Priority filter: HIGH = ${noteList.length}");
+      // --------------------------------------------------------------------------
+      // 3. Priority Level Filter
+      // --------------------------------------------------------------------------
+
+      switch (state.priorityLevel) {
+        case PriorityLevel.all:
+          logger.i("🎚 Priority filter: ALL");
+          break;
+
+        case PriorityLevel.low:
+          noteList = noteList.where((note) => note.priority == 0).toList();
+          logger.i("🎚 Priority filter: LOW → ${noteList.length} notes");
+          break;
+
+        case PriorityLevel.medium:
+          noteList = noteList.where((note) => note.priority == 1).toList();
+          logger.i("🎚 Priority filter: MEDIUM → ${noteList.length} notes");
+          break;
+
+        case PriorityLevel.high:
+          noteList = noteList.where((note) => note.priority == 2).toList();
+          logger.i("🎚 Priority filter: HIGH → ${noteList.length} notes");
+          break;
       }
 
+      // --------------------------------------------------------------------------
+      // 4. Sorting Filters (creation date or due date)
+      // --------------------------------------------------------------------------
 
       ///Then apply all the others filters
       if (state.sortingFilter == SortingFilter.creationDate) {
@@ -278,8 +307,11 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
       }
 
       // 4. Emit final updated state
+      logger.i("📤 Emitting updated notes → ${noteList.length} notes");
       emit(state.copyWith(notesList: noteList, isLoading: false));
-    } catch (e) {
+    } catch (e,stack) {
+      logger.e("🔥 ERROR in _fetchNotesEvent → $e");
+      logger.e("📌 STACK TRACE → $stack");
       emit(state.copyWith(errorMessage: e.toString(), isLoading: false));
     }
   }

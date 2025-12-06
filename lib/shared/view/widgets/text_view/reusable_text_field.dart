@@ -21,6 +21,7 @@ class ReusableTextField extends HookWidget {
   final bool isHeading;
   final Widget? suffixIcon;
   final String? Function(String?)? validator;
+  final int minLines;
 
   const ReusableTextField({
     super.key,
@@ -41,6 +42,7 @@ class ReusableTextField extends HookWidget {
     this.prefixText,
     this.onTapPrefix,
     this.validator,
+    this.minLines=1
   });
 
   @override
@@ -76,7 +78,7 @@ class ReusableTextField extends HookWidget {
       keyboardType: keyboardType,
       inputFormatters: inputFormatters,
       textAlignVertical: TextAlignVertical.center,
-      minLines: 1,
+      minLines: minLines,
       decoration: !isBorder
           ? InputDecoration(
         border: InputBorder.none,
@@ -87,7 +89,7 @@ class ReusableTextField extends HookWidget {
         hintText: hintText,
         hintStyle: TextStyle(
           fontFamily: 'Poppins',
-          color: Colors.black.withOpacity(0.8),
+          color: Colors.black.withValues(alpha: 0.8),
         ),
       )
           : InputDecoration(
@@ -112,7 +114,7 @@ class ReusableTextField extends HookWidget {
               prefixIcon,
               color: isFocused.value
                   ? theme.primary
-                  : theme.onSurface.withOpacity(0.8),
+                  : theme.onSurface.withValues(alpha: 0.8),
               size: 25,
             ),
           ),

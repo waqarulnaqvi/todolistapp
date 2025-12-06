@@ -43,7 +43,8 @@ class HomePage extends HookWidget {
 
     useEffect(() {
       WidgetsBinding.instance.addPostFrameCallback((_) async {
-        await NotificationPermissionHelper.instance.requestPermission();
+        // REQUEST BOTH PERMISSIONS BEFORE ANYTHING ELSE
+        await NotificationPermissionHelper.instance.requestAllPermissions();
       });
       return null;
     }, []);

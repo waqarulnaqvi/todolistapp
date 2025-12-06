@@ -77,7 +77,9 @@ List<DrawerModel> drawerContentsList(BuildContext context) => [
 Future<void> shareAppLink() async {
   try {
     final String message =
-        "Discover a powerful solution for managing your expenses and budget effectively:\n\nhttps://play.google.com/store/apps/details?id=${AppConstants.appPackage}";
+        "Boost your productivity with a clean and powerful Notes App — organize tasks, set reminders, and stay on track effortlessly.\n\n"
+        "Download now:\nhttps://play.google.com/store/apps/details?id=${AppConstants.appPackage}";
+
     await Share.share(message);
   } catch (e) {
     if (kDebugMode) {

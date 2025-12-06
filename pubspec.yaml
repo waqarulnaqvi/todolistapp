@@ -44,6 +44,7 @@ dependencies:
 
   # App Icons
   icons_launcher: ^3.0.3
+  android_intent_plus: ^6.0.0
 
 dev_dependencies:
   flutter_test:

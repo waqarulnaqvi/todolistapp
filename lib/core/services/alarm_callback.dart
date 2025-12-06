@@ -2,6 +2,7 @@ import 'package:todolistapp/core/services/notification_helper.dart';
 
 /// MUST BE a TOP LEVEL FUNCTION — not inside a class.
 /// AlarmManager will pass the note ID automatically.
+@pragma('vm:entry-point') // REQUIRED for AndroidAlarmManager
 void alarmCallback(int id, Map<String, dynamic> params) async {
   print("ALARM TRIGGERED FOR NOTE ID: $id");
 

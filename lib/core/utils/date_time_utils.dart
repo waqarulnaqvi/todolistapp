@@ -13,7 +13,7 @@
 String formatDateTimeNow({bool isDueDate=false,DateTime? customDateTime}) {
   // If it's due date → add 10 minutes
   DateTime date = isDueDate
-      ? DateTime.now().add(const Duration(minutes: 10))
+      ? DateTime.now().add(const Duration(minutes: 2))
       : DateTime.now();
 
   // DateTime format
