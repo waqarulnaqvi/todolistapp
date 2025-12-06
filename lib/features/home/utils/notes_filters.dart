@@ -1,3 +1,8 @@
+import 'dart:ui';
+
+import 'package:flutter/material.dart';
+import 'package:todolistapp/core/theme/app_colors.dart';
+
 /// Defines sorting options for the todoList.
 /// `title` = Alphabetical sorting by title
 /// `dueDate` = Sort by the task's due date
@@ -116,3 +121,43 @@ enum PriorityLevel {
   static int toInt(String priority) =>
       PriorityLevel.values.indexWhere((e) => e.value == priority);
 }
+
+
+enum AddPriority {
+  low("Low"),
+  medium("Medium"),
+  high("High");
+
+  /// Display label for UI.
+  final String value;
+
+  const AddPriority(this.value);
+
+  /// Priority color for UI.
+  Color get color {
+    switch (this) {
+      case AddPriority.low:
+        return AppColors.lightGreen;
+      case AddPriority.medium:
+        return AppColors.lightBlue;
+      case AddPriority.high:
+        return AppColors.redOrange;
+    }
+  }
+
+  /// Convert display text → enum.
+  static AddPriority fromValue(String value) =>
+      AddPriority.values.firstWhere(
+            (e) => e.value == value,
+        orElse: () => AddPriority.low,
+      );
+
+  /// Convert index → enum using safe clamping.
+  static AddPriority fromInt(int index) =>
+      AddPriority.values[index.clamp(0, AddPriority.values.length - 1)];
+
+  /// Convert display text → index.
+  static int toInt(String priority) =>
+      AddPriority.values.indexWhere((e) => e.value == priority);
+}
+

@@ -3,23 +3,21 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:todolistapp/core/constants/static_assets/app_icons.dart';
 import 'package:todolistapp/core/routes/paths.dart';
+import 'package:todolistapp/core/services/notification_permission_helper.dart';
+import 'package:todolistapp/core/utils/dialog/dialog_helper.dart';
 import 'package:todolistapp/features/home/model/todo_list_model.dart';
+import 'package:todolistapp/features/home/view/widgets/filter_widget.dart';
 import 'package:todolistapp/shared/view/widgets/text_view/reusable_text_field.dart';
-import '../../../../core/di/service_locator.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_gradients.dart';
 import '../../../../core/theme/app_styles.dart';
 import '../../../../core/utils/util.dart';
 import '../../../../shared/view/widgets/containers/reusable_folded_corner_container.dart';
-import '../../../../shared/view/widgets/theme_controller_widget.dart';
 import '../../utils/notes_filters.dart';
 import '../../viewmodel/bloc/home_bloc/home_bloc.dart';
 import '../widgets/app_bar.dart';
 import '../widgets/drawer/custom_drawer.dart';
-import '../widgets/my_notes_filter.dart';
 
 class HomePage extends HookWidget {
   const HomePage({super.key});
@@ -29,8 +27,9 @@ class HomePage extends HookWidget {
     final ColorScheme theme = Theme.of(context).colorScheme;
     final Size size = MediaQuery.of(context).size;
     final double w = size.width;
+    final double h = size.height;
     final titleController = useTextEditingController();
-    final scaffoldKey = GlobalKey<ScaffoldState>();
+    final scaffoldKey = useMemoized(() => GlobalKey<ScaffoldState>());
     final isLightTheme = Theme.of(context).brightness == Brightness.light;
     final bgColor = isLightTheme
         ? AppColors.appBackgroundColor
@@ -40,215 +39,221 @@ class HomePage extends HookWidget {
     void onPressedSearchButton() {
       titleController.clear();
       homeBloc.add(ToggleSearchButtonEvent());
+      homeBloc.add(FetchNotesEvent());
     }
 
-    return Scaffold(
-      key: scaffoldKey,
-      endDrawer: CustomDrawer(w: w * 0.7),
-      appBar: PreferredSize(
-        preferredSize: Size.fromHeight(100),
-        child: DecoratedBox(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(colors: AppGradients.orangeMyAppGradient),
-          ),
-          child: appBar(
-            onPressed: onPressedSearchButton,
-            theme: theme,
-            context: context,
-            scaffoldKey: scaffoldKey,
-          ),
-        ),
-      ),
-      backgroundColor: AppColors.appBackgroundColor,
-      body: Stack(
-        children: [
-          Positioned(
-            top: 0,
-            left: 0,
-            right: 0,
-            child: Container(
-              height: 200.h,
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: AppGradients.orangeMyAppGradient,
-                ),
+    useEffect(() {
+      WidgetsBinding.instance.addPostFrameCallback((_) async {
+        await NotificationPermissionHelper.instance.requestPermission();
+      });
+      return null;
+    }, []);
+
+
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (value, result) =>
+          DialogHelper.showYesNoDialog(context),
+      child: Scaffold(
+        resizeToAvoidBottomInset: false,
+        key: scaffoldKey,
+        endDrawer: CustomDrawer(w: w * 0.7),
+        appBar: PreferredSize(
+          preferredSize: Size.fromHeight(100),
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: AppGradients.orangeMyAppGradient,
               ),
             ),
+            child: appBar(
+              onPressed: onPressedSearchButton,
+              theme: theme,
+              context: context,
+              scaffoldKey: scaffoldKey,
+            ),
           ),
-          Positioned.fill(
-            child: ClipRRect(
-              borderRadius: BorderRadius.only(
-                topLeft: Radius.circular(20),
-                topRight: Radius.circular(20),
+        ),
+        backgroundColor: AppColors.appBackgroundColor,
+        body: SafeArea(
+          child: Stack(
+            children: [
+              Positioned(
+                top: 0,
+                left: 0,
+                right: 0,
+                child: Container(
+                  height: 200.h,
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: AppGradients.orangeMyAppGradient,
+                    ),
+                  ),
+                ),
               ),
-              child: DecoratedBox(
-                decoration: BoxDecoration(color: AppColors.appBackgroundColor),
-                child: Column(
-                  children: [
-                    Flexible(
-                      child: BlocBuilder<HomeBloc, HomeState>(
-                        builder: (context, state) {
-                          if (state.isShowSearchIcon) {
+              Positioned(
+                child: ClipRRect(
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(20),
+                    topRight: Radius.circular(20),
+                  ),
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      color: AppColors.appBackgroundColor,
+                    ),
+                    child: Column(
+                      children: [
+                        spacerH(),
+                        BlocSelector<HomeBloc, HomeState, bool>(
+                          selector: (state) => state.isShowSearchIcon,
+                          builder: (context, isShow) {
+                            if (!isShow) return SizedBox.shrink();
                             return Padding(
                               padding: EdgeInsets.symmetric(
-                                horizontal: 15.w,
-                              ).copyWith(top: 20.h),
+                                horizontal: 20.w,
+                              ).copyWith(bottom: 10.h),
                               child: ReusableTextField(
                                 controller: titleController,
                                 hintText: "Search by Title",
+                                onChanged: (value) {
+                                    homeBloc.add(
+                                      FetchNotesEvent(title: value.trim()),
+                                    );
+                                },
                                 suffixIcon: IconButton(
                                   onPressed: onPressedSearchButton,
                                   icon: Icon(Icons.cancel),
                                 ),
                               ),
                             );
-                          } else {
-                            return SizedBox.shrink();
-                          }
-                        },
-                      ),
-                    ),
-                    spacerH(),
-                    MyNotesFilter(),
-                    spacerH(10),
-                    Flexible(
-                      child: BlocBuilder<HomeBloc, HomeState>(
-                        builder: (context, state) {
-                          if (state.errorMessage != null) {
-                            return Center(
-                              child: Text(
-                                state.errorMessage!,
-                                style: AppStyles.descriptionPrimary(
-                                  context: context,
-                                  color: Colors.red,
-                                ),
-                              ),
-                            );
-                          }
-                          return state.notesList.isEmpty
-                              ? Center(
-                                  child: state.isLoading
-                                      ? CircularProgressIndicator(
-                                          color: theme.primary,
-                                        )
-                                      : Text(
-                                          'No Notes Found!',
-                                          style: TextStyle(
-                                            fontSize: 16,
-                                            color: Colors.black,
-                                          ),
-                                        ),
-                                )
-                              : state.styleFilter.value ==
-                                    StyleFilter.classic.value
-                              ? ListView.builder(
-                                  itemCount: state.notesList.length,
-                                  padding: EdgeInsets.only(
-                                    top: 10.h,
-                                    bottom: 80.h,
+                          },
+                        ),
+                        FilterWidget(),
+                        spacerH(10),
+                        Expanded(
+                          child: BlocBuilder<HomeBloc, HomeState>(
+                            builder: (context, state) {
+                              if (state.errorMessage != null) {
+                                return Center(
+                                  child: Text(
+                                    state.errorMessage!,
+                                    style: AppStyles.descriptionPrimary(
+                                      context: context,
+                                      color: Colors.red,
+                                    ),
                                   ),
-                                  itemBuilder: (context, index) {
-                                    final note = state.notesList[index];
-
-                                    return Padding(
-                                      padding: EdgeInsets.only(
-                                        left: 15.w,
-                                        top: 10.h,
-                                        bottom: 10.h,
-                                      ),
-                                      child: ReusableFoldedCornerContainer(
-                                        title: note.title,
-                                        description: note.description,
-                                        date: "",
-                                        color: Colors.white,
-                                        onTap: () {
-                                          Navigator.pushNamed(
-                                            context,
-                                            Paths.notesManagementPage,
-                                            arguments: note,
-                                          );
-                                        },
-                                        currKey: 1,
-                                      ),
-                                    );
-                                  },
-                                )
-                              : MasonryGridView.builder(
-                                  padding: EdgeInsets.symmetric(
-                                    horizontal: 20.w,
-                                  ),
-                                  shrinkWrap: true,
-                                  gridDelegate:
-                                      const SliverSimpleGridDelegateWithFixedCrossAxisCount(
-                                        crossAxisCount: 2,
-                                      ),
-                                  itemCount: state.notesList.length,
-                                  mainAxisSpacing: 10.h,
-                                  crossAxisSpacing: 20.w,
-                                  itemBuilder: (context, index) {
-                                    final note = state.notesList[index];
-                                    final height =
-                                        ((index == 0 ||
-                                                    index ==
-                                                        state.notesList.length -
-                                                            1)
-                                                ? 155
-                                                : 200)
-                                            .h;
-
-                                    return Padding(
-                                      padding: EdgeInsets.only(
-                                        top: 10.h,
-                                        bottom: 10.h,
-                                      ),
-                                      child: ReusableFoldedCornerContainer(
-                                        height: height,
-                                        specialHeight:
-                                            (index == 0 ||
-                                                index ==
-                                                    state.notesList.length - 1)
-                                            ? false
-                                            : true,
-                                        hideDecoration: true,
-                                        title: note.title,
-                                        description: note.description,
-                                        date: "",
-                                        color: Colors.white,
-                                        onTap: () {
-                                          Navigator.pushNamed(
-                                            context,
-                                            Paths.notesManagementPage,
-                                            arguments: note,
-                                          );
-                                        },
-                                        currKey: 0,
-                                      ),
-                                    );
-                                  },
                                 );
-                        },
-                      ),
+                              }
+                              return state.notesList.isEmpty
+                                  ? Center(
+                                      child: state.isLoading
+                                          ? CircularProgressIndicator(
+                                              color: theme.primary,
+                                            )
+                                          : Text(
+                                              'No Notes Found!',
+                                              style: TextStyle(
+                                                fontSize: 16,
+                                                color: Colors.black,
+                                              ),
+                                            ),
+                                    )
+                                  : state.styleFilter.value ==
+                                        StyleFilter.classic.value
+                                  ? _buildClassicList(state)
+                                  : _buildGridList(state);
+                            },
+                          ),
+                        ),
+                      ],
                     ),
-                  ],
+                  ),
                 ),
               ),
-            ),
+            ],
           ),
-        ],
+        ),
+        floatingActionButton: FloatingActionButton(
+          onPressed: () => _openNoteManagementPage(context: context),
+          backgroundColor: theme.primary,
+          child: const Icon(Icons.add, color: Colors.white),
+        ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => _openNoteManagementPage(context: context),
-        backgroundColor: theme.primary,
-        child: const Icon(Icons.add, color: Colors.white),
+    );
+  }
+
+  /// CLASSIC LIST VIEW
+  Widget _buildClassicList(final HomeState state) {
+    return ListView.builder(
+      itemCount: state.notesList.length,
+      padding: EdgeInsets.only(top: 10.h, bottom: 60.h),
+      itemBuilder: (context, index) {
+        final note = state.notesList[index];
+
+        return Padding(
+          padding: EdgeInsets.only(left: 15.w, top: 10.h, bottom: 10.h),
+          child: ReusableFoldedCornerContainer(
+            id: note.id!,
+            isReminder: note.isReminder,
+            title: note.title,
+            description: note.description,
+            creationDate: note.creationDate,
+            dueDate: note.dueDate,
+            priorityColor: AddPriority.fromInt(note.priority).color,
+            onTap: () =>
+                _openNoteManagementPage(context: context, todoModel: note),
+          ),
+        );
+      },
+    );
+  }
+
+  /// MASONRY GRID VIEW
+  Widget _buildGridList(final HomeState state) {
+    return MasonryGridView.builder(
+      padding: EdgeInsets.symmetric(horizontal: 20.w),
+      shrinkWrap: true,
+      gridDelegate: const SliverSimpleGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2,
       ),
+      itemCount: state.notesList.length,
+      mainAxisSpacing: 10.h,
+      crossAxisSpacing: 20.w,
+      itemBuilder: (context, i) {
+        final note = state.notesList[i];
+        final bool isSmall = (i == 0 || i == state.notesList.length - 1);
+        final bool isBig = state.notesList.length < 2;
+
+        return Padding(
+          padding: EdgeInsets.only(top: 10.h, bottom: 10.h),
+          child: ReusableFoldedCornerContainer(
+            height: (isSmall ? 280 : 300).h,
+            specialHeight: !isSmall,
+            hideDecoration: true,
+            id: note.id!,
+            isReminder: note.isReminder,
+            title: note.title,
+            description: note.description,
+            creationDate: note.creationDate,
+            dueDate: note.dueDate,
+            priorityColor: AddPriority.fromInt(note.priority).color,
+            onTap: () =>
+                _openNoteManagementPage(context: context, todoModel: note),
+          ),
+        );
+      },
     );
   }
 
   /// NAVIGATION HANDLER
   void _openNoteManagementPage({
-    TodoListModel? budget,
+    TodoListModel? todoModel,
     required BuildContext context,
   }) {
-    Navigator.pushNamed(context, Paths.notesManagementPage, arguments: budget);
+    Navigator.pushNamed(
+      context,
+      Paths.notesManagementPage,
+      arguments: todoModel,
+    );
   }
 }

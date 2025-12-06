@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../../../core/theme/app_styles.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 
-class ReusableTextField extends StatefulWidget {
+class ReusableTextField extends HookWidget {
   final TextEditingController controller;
   final String hintText;
   final int? maxLines;
@@ -19,6 +20,7 @@ class ReusableTextField extends StatefulWidget {
   final bool isBorder;
   final bool isHeading;
   final Widget? suffixIcon;
+  final String? Function(String?)? validator;
 
   const ReusableTextField({
     super.key,
@@ -38,133 +40,103 @@ class ReusableTextField extends StatefulWidget {
     this.focusNode,
     this.prefixText,
     this.onTapPrefix,
+    this.validator,
   });
 
   @override
-  State<ReusableTextField> createState() => _ReusableTextFieldState();
-}
-
-class _ReusableTextFieldState extends State<ReusableTextField> {
-  final FocusNode _focusNode = FocusNode();
-  bool _isFocused = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _focusNode.addListener(() {
-      setState(() {
-        _isFocused = _focusNode.hasFocus;
-      });
-    });
-  }
-
-  @override
-  void dispose() {
-    _focusNode.dispose();
-    super.dispose();
-  }
-
-
-  @override
   Widget build(BuildContext context) {
-    var theme = Theme.of(context).colorScheme;
+    final theme = Theme.of(context).colorScheme;
+
+    // Use external focusNode or create internal one safely
+    final localFocusNode = useFocusNode();
+    final currentFocusNode = focusNode ?? localFocusNode;
+
+    // Track focus changes using hooks
+    final isFocused = useState(false);
+
+    useEffect(() {
+      void listener() {
+        isFocused.value = currentFocusNode.hasFocus;
+      }
+
+      currentFocusNode.addListener(listener);
+      return () => currentFocusNode.removeListener(listener);
+    }, [currentFocusNode]);
+
     return TextFormField(
-      onChanged: (value) {
-        if (widget.onChanged != null) {
-          widget.onChanged!(value);
-        }
-      },
-      focusNode: widget.focusNode ?? _focusNode,
-      obscureText: false,
-      maxLines: widget.maxLines,
-      controller: widget.controller,
-      style:
-          widget.isHeading ? AppStyles.headingPrimary(context: context,color: Colors.black) :AppStyles.descriptionPrimary(context: context,color: Colors.black),
-      keyboardType: widget.keyboardType,
-      inputFormatters: widget.inputFormatters,
+      onChanged: onChanged,
+      focusNode: currentFocusNode,
+      obscureText: isPassword,
+      validator: validator,
+      maxLines: maxLines,
+      controller: controller,
+      style: isHeading
+          ? AppStyles.headingPrimary(context: context)
+          : AppStyles.descriptionPrimary(context: context),
+      keyboardType: keyboardType,
+      inputFormatters: inputFormatters,
       textAlignVertical: TextAlignVertical.center,
       minLines: 1,
-      decoration:
-          !widget.isBorder
-              ? InputDecoration(
-                border: InputBorder.none,
-                enabledBorder: InputBorder.none,
-                focusedBorder: InputBorder.none,
-                disabledBorder: InputBorder.none,
-                contentPadding: const EdgeInsets.symmetric(horizontal: 15),
-                hintText: widget.hintText,
-                hintStyle:
-                    !widget.isHeading
-                        ? TextStyle(
-                          fontFamily: 'Poppins',
-                          color:
-                              _isFocused
-                                  ?Colors.black.withValues(alpha: 0.8)
-                                  // : theme.onSurface.withValues(alpha: 0.8),
-                                  : Colors.black.withValues(alpha: 0.8),
-                        )
-                        : AppStyles.headingPrimary(
-                          context: context,
-                          color:Colors.black.withValues(alpha: 0.8),
-                          fontSize: 32,
-                        ),
-                // contentPadding: EdgeInsets.zero, // Optional: removes internal padding
-              )
-              : InputDecoration(
-                prefixIcon:
-                    widget.prefixText != null || widget.prefixIcon != null
-                        ? InkWell(
-                          onTap: widget.onTapPrefix,
-                          child:
-                              widget.prefixText != null
-                                  ? Padding(
-                                    padding: const EdgeInsets.only(
-                                      top: 12,
-                                      left: 18,
-                                    ),
-                                    child: Text(
-                                      widget.prefixText!,
-                                      style: AppStyles.headingPrimary(
-                                        context: context,
-                                      ),
-                                    ),
-                                  )
-                                  : widget.prefixIcon == null
-                                  ? null
-                                  : Padding(
-                                    padding: const EdgeInsets.only(top: 5),
-                                    child: Icon(
-                                      widget.prefixIcon,
-                                      color:
-                                          _isFocused
-                                              ? theme.primary
-                                              : theme.onSurface.withValues(
-                                                alpha: 0.8,
-                                              ),
-                                      size: 25,
-                                    ),
-                                  ),
-                        )
-                        : null,
-                suffixIcon: widget.suffixIcon,
-                hintText: widget.hintText,
-                hintStyle: TextStyle(
-                  fontFamily: 'Poppins',
-                  color:
-                      _isFocused
-                          ? theme.primary
-                          : theme.onSurface.withValues(alpha: 0.8),
-                ),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(widget.radius ?? 15),
-                  borderSide: BorderSide(
-                    color: _isFocused ? theme.primary : theme.onSurface,
-                    width: 1.5,
-                  ),
-                ),
-                fillColor: theme.surface,
-                filled: widget.filled,
+      decoration: !isBorder
+          ? InputDecoration(
+        border: InputBorder.none,
+        enabledBorder: InputBorder.none,
+        focusedBorder: InputBorder.none,
+        disabledBorder: InputBorder.none,
+        contentPadding: const EdgeInsets.symmetric(horizontal: 15),
+        hintText: hintText,
+        hintStyle: TextStyle(
+          fontFamily: 'Poppins',
+          color: Colors.black.withOpacity(0.8),
+        ),
+      )
+          : InputDecoration(
+        prefixIcon: prefixText != null || prefixIcon != null
+            ? InkWell(
+          onTap: onTapPrefix,
+          child: prefixText != null
+              ? Padding(
+            padding: const EdgeInsets.only(top: 12, left: 18),
+            child: Text(
+              prefixText!,
+              style: AppStyles.headingPrimary(
+                context: context,
               ),
+            ),
+          )
+              : prefixIcon == null
+              ? null
+              : Padding(
+            padding: const EdgeInsets.only(top: 5),
+            child: Icon(
+              prefixIcon,
+              color: isFocused.value
+                  ? theme.primary
+                  : theme.onSurface.withOpacity(0.8),
+              size: 25,
+            ),
+          ),
+        )
+            : null,
+        suffixIcon: suffixIcon,
+        hintText: hintText,
+        hintStyle: TextStyle(
+          fontFamily: 'Poppins',
+          color: isFocused.value
+              ? theme.primary
+              : theme.onSurface.withValues(alpha: 0.8),
+        ),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(radius ?? 15),
+          borderSide: BorderSide(
+            color:
+            isFocused.value ? theme.primary : theme.onSurface,
+            width: 1.5,
+          ),
+        ),
+        fillColor: theme.surface,
+        filled: filled,
+      ),
     );
   }
 }

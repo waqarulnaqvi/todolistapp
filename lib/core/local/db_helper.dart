@@ -17,6 +17,7 @@ class DBHelper {
   static const String columnTodoCreationDate = 'todo_creation_date';
   static const String columnTodoDueDate = 'todo_due_date';
   static const String columnTodoPriority = 'todo_priority';
+  static const String columnTodoReminder = 'todo_reminder';
 
   // Private constructor
   DBHelper._private();
@@ -48,7 +49,8 @@ class DBHelper {
             $columnTodoDescription TEXT,
             $columnTodoCreationDate TEXT,
             $columnTodoDueDate TEXT,
-            $columnTodoPriority INTEGER
+            $columnTodoPriority INTEGER,
+            $columnTodoReminder INTEGER
           )
         ''');
       },
@@ -100,18 +102,6 @@ class DBHelper {
   Future<bool> updateTodoListData(TodoListModel todo) async {
     try {
       Database db = await getDB();
-
-      final oldItem = await getTodoById(todo.id!);
-      if (oldItem == null) return false;
-
-      bool noChanges =
-          oldItem.title == todo.title &&
-          oldItem.description == todo.description &&
-          oldItem.dueDate == todo.dueDate &&
-          oldItem.priority == todo.priority &&
-          oldItem.creationDate == todo.creationDate;
-
-      if (noChanges) return false;
 
       int rows = await db.update(
         todoListTableName,

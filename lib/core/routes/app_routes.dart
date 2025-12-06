@@ -12,26 +12,28 @@ import '../di/service_locator.dart';
 class AppRoutes {
   static Route? onGenerateRoute(RouteSettings settings) {
     switch (settings.name) {
+
       case Paths.initial:
-        return MaterialPageRoute(builder: (context) => SplashPage());
+        return MaterialPageRoute(builder: (_) => SplashPage());
 
       case Paths.homePage:
         return MaterialPageRoute(
-          builder: (context) =>
-              BlocProvider(create: (_) => sL<HomeBloc>(), child: HomePage()),
+          builder: (_) => const HomePage(),  // ← USE GLOBAL BLOC
         );
 
       case Paths.notesManagementPage:
         final myNotesModel = settings.arguments as TodoListModel?;
+
         return MaterialPageRoute(
-          builder: (_) => BlocProvider.value(
-            value: sL<HomeBloc>(), // use existing HomeBloc instance
+          builder: (context) => BlocProvider.value(
+            value: BlocProvider.of<HomeBloc>(context), // SAME INSTANCE
             child: NotesManagementPage(myNotesModel: myNotesModel),
           ),
         );
 
       default:
-        return MaterialPageRoute(builder: (context) => Container());
+        return MaterialPageRoute(builder: (_) => Container());
     }
   }
 }
+

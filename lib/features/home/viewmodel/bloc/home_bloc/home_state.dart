@@ -1,25 +1,29 @@
 part of 'home_bloc.dart';
 
 class HomeState extends Equatable {
-  final bool isShowFilter;
   final bool isLoading;
-  final Color selectedColor;
+  final bool isShowFilter;
+  final bool isShowSearchIcon;
+  ///All The Filters
   final OrderFilter orderFilter;
   final SortingFilter sortingFilter;
   final StyleFilter styleFilter;
-  final String? errorMessage;
   final PriorityLevel priorityLevel;
+  ///When Add the priority
+  final AddPriority addPriority;
+  ///Notes
   final List<TodoListModel> notesList;
-  final bool isShowSearchIcon;
+  ///Error Message
+  final String? errorMessage;
 
   const HomeState({
     this.errorMessage,
     this.isShowFilter = false,
-    this.styleFilter = StyleFilter.staggered,
+    this.styleFilter = StyleFilter.classic,
     this.orderFilter = OrderFilter.descending,
     this.sortingFilter = SortingFilter.creationDate,
-    this.selectedColor = AppColors.redOrange,
     this.priorityLevel = PriorityLevel.all,
+    this.addPriority = AddPriority.high,
     this.notesList = const [],
     this.isLoading = false,
     this.isShowSearchIcon = false,
@@ -35,7 +39,7 @@ class HomeState extends Equatable {
     priorityLevel,
     errorMessage,
     notesList,
-    selectedColor,
+    addPriority,
     isShowSearchIcon,
   ];
 
@@ -45,9 +49,9 @@ class HomeState extends Equatable {
     OrderFilter? orderFilter,
     SortingFilter? sortingFilter,
     StyleFilter? styleFilter,
+    AddPriority? addPriority,
     String? errorMessage,
     List<TodoListModel>? notesList,
-    Color? selectedColor,
     PriorityLevel? priorityLevel,
     bool? isShowSearchIcon,
   }) {
@@ -56,10 +60,10 @@ class HomeState extends Equatable {
       isShowFilter: isShowFilter ?? this.isShowFilter,
       styleFilter: styleFilter ?? this.styleFilter,
       orderFilter: orderFilter ?? this.orderFilter,
+      addPriority: addPriority?? this.addPriority,
       sortingFilter: sortingFilter ?? this.sortingFilter,
       errorMessage: errorMessage ?? this.errorMessage,
-      notesList: List.unmodifiable(notesList ?? this.notesList),
-      selectedColor: selectedColor ?? this.selectedColor,
+      notesList: notesList ?? this.notesList,
       priorityLevel: priorityLevel ?? this.priorityLevel,
       isShowSearchIcon: isShowSearchIcon ?? this.isShowSearchIcon,
     );
