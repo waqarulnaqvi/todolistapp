@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 import '../../../../core/constants/static_assets/app_icons.dart';
@@ -14,8 +15,7 @@ Widget appBar({
   required final BuildContext context,
   required VoidCallback onPressed,
   required final GlobalKey<ScaffoldState> scaffoldKey,
-})
-{
+}) {
   String timeString = DateTime.now().toString().split(" ")[1];
   // Parse the hour part
   int hour = int.parse(timeString.split(":")[0]);
@@ -67,25 +67,32 @@ Widget appBar({
           ),
           const Spacer(),
           spacerW(5),
-          BlocBuilder<HomeBloc, HomeState>(
-            builder: (context, state) {
-              return IconButton(onPressed: onPressed, icon: Icon(state.isShowSearchIcon? Icons.cancel :Icons.search_rounded,
-                color: theme.surface,
-              ),);
+          BlocSelector<HomeBloc, HomeState, bool>(
+            selector: (state) => state.isShowSearchIcon,
+            builder: (context, isShown) {
+              return IconButton(
+                onPressed: onPressed,
+                icon: Icon(
+                  isShown ? Icons.cancel : Icons.search_rounded,
+                  color: theme.surface,
+                ),
+              );
             },
           ),
+
           ThemeControllerWidget(),
-          spacerW(5),
           InkWell(
             onTap: () {
               scaffoldKey.currentState?.openEndDrawer();
             },
+            child:Padding(
+            padding: EdgeInsets.symmetric(vertical: 10.h,horizontal: 5.w),
             child: Icon(
               FontAwesomeIcons.barsStaggered,
               color: theme.surface,
-              size: 20,
+              size: 20.r,
             ),
-          ),
+          ),),
         ],
       ),
     ),

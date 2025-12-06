@@ -20,7 +20,6 @@ Future<void> main() async {
 
   await AndroidAlarmManager.initialize();
 
-
   await NotificationHelper.init();
 
   // Initialize service locator (DI)
@@ -44,10 +43,7 @@ Future<void> main() async {
     MultiBlocProvider(
       providers: [
         BlocProvider(
-          create: (_) => ThemeBloc(
-            initialTheme: savedTheme,
-            prefs: prefs,
-          ),
+          create: (_) => ThemeBloc(initialTheme: savedTheme, prefs: prefs),
         ),
         BlocProvider(
           create: (_) => sL<HomeBloc>(), // Single instance of HomeBloc
@@ -56,7 +52,6 @@ Future<void> main() async {
       child: const MyApp(),
     ),
   );
-
 }
 
 class MyApp extends StatelessWidget {
@@ -78,12 +73,11 @@ class MyApp extends StatelessWidget {
             debugShowCheckedModeBanner: false,
             theme: theme.light(),
             darkTheme: theme.dark(),
-
             themeMode: state.currentTheme == ThemeValue.light.value
                 ? ThemeMode.light
                 : ThemeMode.dark,
             onGenerateRoute: AppRoutes.onGenerateRoute,
-            initialRoute: Paths.homePage,
+            initialRoute: Paths.initial,
           ),
         );
       },

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:todolistapp/core/constants/app_constants.dart';
+import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/theme/app_gradients.dart';
 import '../../../../../core/utils/util.dart';
 import '../../../../../shared/view/widgets/reusable_circular_image.dart';
@@ -19,7 +20,7 @@ class CustomDrawer extends StatelessWidget {
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [Colors.white, Color.fromARGB(255, 184, 241, 240)],
+          colors: [Colors.white, AppColors.appBackgroundColor],
         ),
       ),
       child: Column(

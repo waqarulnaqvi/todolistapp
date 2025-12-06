@@ -40,6 +40,7 @@ dependencies:
   url_launcher: ^6.3.2
   logger: ^2.6.2
   flutter_datetime_picker_plus: ^2.2.0
+  share_plus: ^12.0.1
 
   # App Icons
   icons_launcher: ^3.0.3
@@ -55,6 +56,8 @@ flutter:
   assets:
     - assets/icons/
     - assets/animation/lottie/
+    - assets/images/
+    - assets/images/onboard/
 
 icons_launcher:
   image_path: assets/icons/app_icon.png

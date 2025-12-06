@@ -29,14 +29,14 @@ class ReusableAppBar extends HookWidget implements PreferredSizeWidget {
     //    final bool canPop = Navigator.of(context).canPop();
     // final Color foregroundColor = theme.surface;
     return AppBar(
-      titleSpacing: 0, /// Remove the default padding from the back button and title
-      leading: canPop
-          ? IconButton(
-        icon: Icon(Platform.isIOS ? Icons.arrow_back_ios : Icons.arrow_back),
-        color: foregroundColor,
-        onPressed: onPressedBackButton ?? () => Navigator.of(context).pop(),
-      )
-          : null,
+      // titleSpacing: 0, /// Remove the default padding from the back button and title
+      // leading: canPop
+      //     ? IconButton(
+      //   icon: Icon(Platform.isIOS ? Icons.arrow_back_ios : Icons.arrow_back),
+      //   color: foregroundColor,
+      //   onPressed: onPressedBackButton ?? () => Navigator.of(context).pop(),
+      // )
+      //     : null,
       backgroundColor: theme.primary,
       centerTitle: isCenterText,
       foregroundColor: foregroundColor,

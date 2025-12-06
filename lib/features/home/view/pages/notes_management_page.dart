@@ -142,6 +142,10 @@ class NotesManagementPage extends HookWidget {
                               activeColor: Colors.black,
                               value: isReminder.value,
                               checkColor: theme.primary,
+                              side: const BorderSide(
+                                color: Colors.black,
+                                width: 2,
+                              ),
                               onChanged: (val) {
                                 isReminder.value = val ?? false;
                               },
@@ -150,6 +154,7 @@ class NotesManagementPage extends HookWidget {
                               "Reminder",
                               style: AppStyles.descriptionPrimary(
                                 context: context,
+                                color: Colors.black
                               ),
                             ),
                           ],
@@ -241,6 +246,7 @@ class NotesManagementPage extends HookWidget {
         return Row(
           children: priorities.map((priority) {
             return reusableRadioButton(
+              color: Colors.black,
               context: context,
               filter: state.addPriority.value,
               w: w,

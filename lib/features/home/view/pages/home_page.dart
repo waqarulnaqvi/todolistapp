@@ -27,13 +27,12 @@ class HomePage extends HookWidget {
     final ColorScheme theme = Theme.of(context).colorScheme;
     final Size size = MediaQuery.of(context).size;
     final double w = size.width;
-    final double h = size.height;
     final titleController = useTextEditingController();
     final scaffoldKey = useMemoized(() => GlobalKey<ScaffoldState>());
     final isLightTheme = Theme.of(context).brightness == Brightness.light;
     final bgColor = isLightTheme
         ? AppColors.appBackgroundColor
-        : AppColors.appBackgroundColor.withValues(alpha: 0.8);
+        : AppColors.appDarkBackgroundColor;
     final homeBloc = context.read<HomeBloc>();
 
     void onPressedSearchButton() {
@@ -74,7 +73,7 @@ class HomePage extends HookWidget {
             ),
           ),
         ),
-        backgroundColor: AppColors.appBackgroundColor,
+        backgroundColor: bgColor,
         body: SafeArea(
           child: Stack(
             children: [
@@ -99,7 +98,7 @@ class HomePage extends HookWidget {
                   ),
                   child: DecoratedBox(
                     decoration: BoxDecoration(
-                      color: AppColors.appBackgroundColor,
+                      color: bgColor,
                     ),
                     child: Column(
                       children: [
@@ -211,7 +210,7 @@ class HomePage extends HookWidget {
   /// MASONRY GRID VIEW
   Widget _buildGridList(final HomeState state) {
     return MasonryGridView.builder(
-      padding: EdgeInsets.symmetric(horizontal: 20.w),
+      padding: EdgeInsets.symmetric(horizontal: 20.w).copyWith(bottom: 60.h),
       shrinkWrap: true,
       gridDelegate: const SliverSimpleGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 2,
@@ -227,7 +226,7 @@ class HomePage extends HookWidget {
         return Padding(
           padding: EdgeInsets.only(top: 10.h, bottom: 10.h),
           child: ReusableFoldedCornerContainer(
-            height: (isSmall ? 280 : 300).h,
+            height: (isBig?320 :isSmall ? 300 : 320).h,
             specialHeight: !isSmall,
             hideDecoration: true,
             id: note.id!,

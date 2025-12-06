@@ -14,6 +14,7 @@ class AppColors{
   static const Color sendMessageColor = Color(0xffDCF8C6);
 
   static const Color appBackgroundColor =Color(0xFFF0D2BB);
+  static const Color appDarkBackgroundColor =Color(0xFFE2B59E);
 
   // static const Color themeDark = Color(0xFF09FBD3);
   static const Color primaryContainerLight= Color.fromRGBO(74, 171, 189, 1.0);

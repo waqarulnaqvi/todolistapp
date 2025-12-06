@@ -5,7 +5,6 @@ import 'package:todolistapp/core/theme/app_colors.dart';
 import 'package:todolistapp/core/utils/dialog/dialog_helper.dart';
 import 'package:todolistapp/features/home/viewmodel/bloc/home_bloc/home_bloc.dart';
 import 'package:todolistapp/shared/view/widgets/containers/date_time_info_box.dart';
-import 'package:todolistapp/shared/view/widgets/containers/reusable_folded_corner_container.dart';
 import '../../../../core/theme/app_styles.dart';
 import '../../../../core/utils/util.dart';
 import '../painter/folded_corner_painter.dart';
@@ -68,115 +67,119 @@ class ReusableFoldedCornerContainer extends StatelessWidget {
               onTap: onTap,
               child: CustomPaint(
                 painter: FoldedCornerPainter(color: priorityColor),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.only(
-                        left: 15,
-                        right: 15,
-                        top: 20,
-                        bottom: 15,
+                child: Padding(
+                  padding: const EdgeInsets.only(
+                    left: 15,
+                    right: 15,
+                    top: 20,
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        title,
+                        style: AppStyles.headingPrimary(
+                          context: context,
+                          fontSize: 18,
+                          color: Colors.black,
+                        ),
+                        maxLines: hideDecoration ? 1 : 2,
+                        overflow: TextOverflow.ellipsis,
                       ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+
+                      spacerH(10),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text(
-                            title,
-                            style: AppStyles.headingPrimary(
-                              context: context,
-                              fontSize: 18,
-                              color: Colors.black,
+                          Flexible(
+                            child: Text(
+                              description,
+                              style: AppStyles.descriptionPrimary(
+                                context: context,
+                                fontSize: 14,
+                                color: Colors.black,
+                              ),
+                              maxLines: hideDecoration ?2:3,
+                              overflow: TextOverflow.ellipsis,
                             ),
-                            maxLines: specialHeight ? 2 : 1,
-                            overflow: TextOverflow.ellipsis,
                           ),
-
-                          spacerH(10),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Flexible(
-                                child: Text(
-                                  description,
-                                  style: AppStyles.descriptionPrimary(
-                                    context: context,
-                                    fontSize: 14,
-                                    color: Colors.black,
-                                  ),
-                                  maxLines: specialHeight ? 3 : 2,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ),
-                              spacerW(10),
-                              InkWell(
-                                onTap: () {
-                                  DialogHelper.deletedEntryDialog(
-                                    context: context,
-                                    onClick: () {
-                                      context.read<HomeBloc>().add(
-                                        DeleteNoteEvent(key: id),
-                                      );
-                                      Navigator.of(context).pop();
-                                    },
-                                    text: "entry",
+                          spacerW(10),
+                          InkWell(
+                            onTap: () {
+                              DialogHelper.deletedEntryDialog(
+                                context: context,
+                                onClick: () {
+                                  context.read<HomeBloc>().add(
+                                    DeleteNoteEvent(key: id),
                                   );
+                                  Navigator.of(context).pop();
                                 },
-                                child: Icon(
-                                  Icons.delete,
-                                  color: Colors.black,
-                                  size: 25.r,
-                                ),
-                              ),
-                            ],
-                          ),
-
-                          if (hideDecoration) Spacer(),
-
-                          spacerH(10),
-
-                          DateTimeInfoBox(
-                            fontSize: hideDecoration==false? 14 :null,
-                            fontWeight: FontWeight.w500,
-                            label: "Creation Date/Time",
-                            dateTime: creationDate,
-                            isClassic: !hideDecoration,
-                          ),
-
-                          spacerH(10),
-
-                          DateTimeInfoBox(
-                            fontSize: hideDecoration==false? 14 :null,
-                            fontWeight: FontWeight.w500,
-                            label: "Due Date/Time",
-                            dateTime: dueDate,
-                            isClassic: !hideDecoration,
+                                text: "entry",
+                              );
+                            },
+                            child: Icon(
+                              Icons.delete,
+                              color: Colors.black,
+                              size: 25.r,
+                            ),
                           ),
                         ],
                       ),
-                    ),
-                    if(isReminder)
-                    Container(
-                      width: double.infinity,
-                      decoration: BoxDecoration(
-                          borderRadius: const BorderRadius.only(
-                            bottomLeft: Radius.circular(10),
-                            bottomRight: Radius.circular(10),
-                          ),
-                        color: AppColors.themeLight
+
+                      if (hideDecoration) Spacer(),
+
+                      spacerH(10),
+
+                      DateTimeInfoBox(
+                        fontSize: hideDecoration==false? 14 :null,
+                        fontWeight: FontWeight.w500,
+                        label: "Creation Date/Time",
+                        dateTime: creationDate,
+                        isClassic: !hideDecoration,
                       ),
-                      padding: EdgeInsets.all(5.r),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(Icons.bookmark,color: Colors.white,),
-                        spacerW(10),
-                        Text("Reminder Added",
-                        style: AppStyles.headingPrimary(context: context,color: Colors.white,fontSize: 18),),
-                      ],
-                    ),
-                    )
-                  ],
+
+                      spacerH(10),
+
+                      DateTimeInfoBox(
+                        fontSize: hideDecoration==false? 14 :null,
+                        fontWeight: FontWeight.w500,
+                        label: "Due Date/Time",
+                        dateTime: dueDate,
+                        isClassic: !hideDecoration,
+                      ),
+
+                      spacerH(15),
+
+                      if(isReminder)
+                        Container(
+                          width: double.infinity,
+                          decoration: BoxDecoration(
+                              borderRadius: const BorderRadius.only(
+                                bottomLeft: Radius.circular(10),
+                                topRight: Radius.circular(10),
+                              ),
+                              color: AppColors.themeLight
+                          ),
+                          padding: EdgeInsets.all(5.r),
+                          margin: EdgeInsets.only(bottom: 15.h),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(Icons.bookmark,color: Colors.white,),
+                              spacerW(hideDecoration?5:10),
+                              Flexible(
+                                child: Text("Reminder Added",
+                                  style: AppStyles.headingPrimary(context: context,color: Colors.white,fontSize: hideDecoration?12: 18,
+                                  ),
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                              spacerW(5),
+                            ],
+                          ),
+                        )
+                    ],
+                  ),
                 ),
               ),
             ),

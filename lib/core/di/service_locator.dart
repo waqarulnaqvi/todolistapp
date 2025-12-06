@@ -1,5 +1,6 @@
 import 'package:get_it/get_it.dart';
 import 'package:todolistapp/core/local/db_helper.dart';
+import 'package:todolistapp/core/services/notification_helper.dart';
 import '../../features/home/viewmodel/bloc/home_bloc/home_bloc.dart';
 import '../local/prefs_helper.dart';
 
@@ -11,6 +12,9 @@ Future<void> initializeDependencies() async {
 
   /// 🔹 PrefsHelper singleton
   sL.registerSingleton<PrefsHelper>(PrefsHelper());
+
+  /// 🔹 Notification singleton
+  sL.registerSingleton<NotificationHelper>(NotificationHelper());
 
   // 🔹 HomeBloc factory
   sL.registerFactory<HomeBloc>(() => HomeBloc());
