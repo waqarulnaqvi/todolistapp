@@ -2,20 +2,31 @@ import 'package:get_it/get_it.dart';
 import 'package:todolistapp/core/local/db_helper.dart';
 import 'package:todolistapp/core/services/notification_helper.dart';
 import '../../features/home/viewmodel/bloc/home_bloc/home_bloc.dart';
+import '../../shared/viewmodel/bloc/theme_bloc/theme_bloc.dart';
+import '../constants/prefs_keys.dart';
 import '../local/prefs_helper.dart';
 
 final sL = GetIt.instance;
 
 Future<void> initializeDependencies() async {
-  /// 🔹 SQF lite singleton
+  // Core
+  sL.registerLazySingleton<PrefsHelper>(() => PrefsHelper());
   sL.registerLazySingleton<DBHelper>(() => DBHelper());
+  sL.registerLazySingleton<NotificationHelper>(() => NotificationHelper());
 
-  /// 🔹 PrefsHelper singleton
-  sL.registerSingleton<PrefsHelper>(PrefsHelper());
+  // Load theme from prefs
+  final prefs = sL<PrefsHelper>();
+  final savedTheme = await prefs.getIntValue(PrefsKeys.currentTheme) ?? 0;
 
-  /// 🔹 Notification singleton
-  sL.registerSingleton<NotificationHelper>(NotificationHelper());
+  // Register ThemeBloc as singleton
+  sL.registerLazySingleton<ThemeBloc>(
+        () => ThemeBloc(initialTheme: savedTheme, prefs: prefs),
+  );
 
-  // 🔹 HomeBloc factory
-  sL.registerFactory<HomeBloc>(() => HomeBloc());
+  // HomeBloc → Factory (each Flow/Screen Group receives its own instance)
+  sL.registerFactory<HomeBloc>(
+        () => HomeBloc(
+      dbHelper: sL<DBHelper>(),
+    ),
+  );
 }

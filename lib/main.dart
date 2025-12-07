@@ -4,8 +4,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:todolistapp/core/constants/app_constants.dart';
-import 'package:todolistapp/core/constants/prefs_keys.dart';
-import 'package:todolistapp/core/local/prefs_helper.dart';
 import 'package:todolistapp/core/services/notification_helper.dart';
 import 'package:todolistapp/features/home/viewmodel/bloc/home_bloc/home_bloc.dart';
 import 'package:todolistapp/shared/utils/theme_value.dart';
@@ -25,12 +23,6 @@ Future<void> main() async {
   // Initialize service locator (DI)
   await initializeDependencies();
 
-  // // Initialize HiveHelper singleton
-  final prefs = sL<PrefsHelper>();
-  //
-  // // Get saved theme value safely
-  final savedTheme = await prefs.getIntValue(PrefsKeys.currentTheme) ?? 0;
-
   // Set status bar style
   SystemChrome.setSystemUIOverlayStyle(
     const SystemUiOverlayStyle(
@@ -43,7 +35,7 @@ Future<void> main() async {
     MultiBlocProvider(
       providers: [
         BlocProvider(
-          create: (_) => ThemeBloc(initialTheme: savedTheme, prefs: prefs),
+          create: (_) => sL<ThemeBloc>(),
         ),
         BlocProvider(
           create: (_) => sL<HomeBloc>(), // Single instance of HomeBloc

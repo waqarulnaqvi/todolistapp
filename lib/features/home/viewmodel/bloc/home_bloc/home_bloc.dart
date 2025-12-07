@@ -7,13 +7,11 @@ import 'package:todolistapp/core/utils/date_time_utils.dart';
 import 'package:todolistapp/features/home/model/todo_list_model.dart';
 import '../../../utils/notes_filters.dart';
 import 'package:todolistapp/core/local/db_helper.dart';
-
 part 'home_event.dart';
-
 part 'home_state.dart';
 
 class HomeBloc extends Bloc<HomeEvent, HomeState> {
-  DBHelper _dbHelper = DBHelper();
+  DBHelper _dbHelper;
   final logger = Logger(
     printer: PrettyPrinter(
       methodCount: 0,       // removes stack frame logs
@@ -22,7 +20,9 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
   );
 
 
-  HomeBloc() : super(const HomeState()) {
+  HomeBloc({required DBHelper dbHelper,bool autoFetch = true,})
+      : _dbHelper = dbHelper,
+        super(const HomeState()) {
     on<AllFiltersEvent>(_allFiltersEvent);
     on<HomeLoadingEvent>(_homeLoadingEvent);
     on<HomeErrorEvent>(_homeErrorEvent);
@@ -46,9 +46,11 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     on<AddPriorityTodoEvent>(_addPriorityTodoEvent);
 
     ///Loading true;
-
-    add(HomeLoadingEvent(isLoading: true));
-    add(FetchNotesEvent());
+    /// STOP automatic loading in tests
+    if (autoFetch) {
+      add(HomeLoadingEvent(isLoading: true));
+      add(FetchNotesEvent());
+    }
   }
 
   ///Add Priority in the while Add the Nodes

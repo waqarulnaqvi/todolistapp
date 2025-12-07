@@ -1,12 +1,13 @@
 import 'package:shared_preferences/shared_preferences.dart';
 
 class PrefsHelper {
+  /// Already become singleton during dependency injection
   // Singleton instance
-  static final PrefsHelper _instance = PrefsHelper._internal();
-
-  factory PrefsHelper() => _instance;
-
-  PrefsHelper._internal();
+  // static final PrefsHelper _instance = PrefsHelper._internal();
+  //
+  // factory PrefsHelper() => _instance;
+  //
+  // PrefsHelper._internal();
 
   static SharedPreferences? _prefs;
 

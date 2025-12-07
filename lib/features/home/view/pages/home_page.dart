@@ -52,8 +52,23 @@ class HomePage extends HookWidget {
 
     return PopScope(
       canPop: false,
-      onPopInvokedWithResult: (value, result) =>
-          DialogHelper.showYesNoDialog(context),
+      onPopInvokedWithResult: (value, result)async {
+        final scaffold = scaffoldKey.currentState;
+
+        // Close drawer if open
+        if (scaffold?.isDrawerOpen == true || scaffold?.isEndDrawerOpen == true) {
+          scaffold?.closeDrawer();
+          scaffold?.closeEndDrawer();
+          return;
+        }
+
+        bool? shouldExit = await DialogHelper.showYesNoDialog(context);
+        if (shouldExit == true) {
+          if (context.mounted) {
+            Navigator.pop(context); // exit the screen
+          }
+        }
+      },
       child: Scaffold(
         resizeToAvoidBottomInset: false,
         key: scaffoldKey,

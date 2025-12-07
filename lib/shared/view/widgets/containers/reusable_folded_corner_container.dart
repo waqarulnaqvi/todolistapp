@@ -83,7 +83,7 @@ class ReusableFoldedCornerContainer extends StatelessWidget {
                           fontSize: 18,
                           color: Colors.black,
                         ),
-                        maxLines: hideDecoration ? 1 : 2,
+                        maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
 
@@ -99,7 +99,7 @@ class ReusableFoldedCornerContainer extends StatelessWidget {
                                 fontSize: 14,
                                 color: Colors.black,
                               ),
-                              maxLines: hideDecoration ?2:3,
+                              maxLines: hideDecoration ?1:2,
                               overflow: TextOverflow.ellipsis,
                             ),
                           ),
